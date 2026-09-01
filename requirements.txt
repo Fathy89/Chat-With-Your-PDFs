@@ -1,0 +1,13 @@
+streamlit==1.49.1
+
+langchain==0.3.27
+langchain-community==0.3.27
+langchain-text-splitters==0.3.9
+langchain-cohere==0.4.5
+
+cohere==5.17.0
+
+faiss-cpu==1.15.0
+
+pypdf==6.0.0
+python-dotenv==1.1.1
