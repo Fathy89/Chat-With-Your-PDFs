@@ -107,21 +107,16 @@ project/
 
 
 ## 📸 Project Demo
-<p align="center">
-  <img src="https://raw.githubusercontent.com/Fathy89/Chat-With-Your-PDFs/main/t1.png" width="80%" />
-</p>
+### image 1
+![img1](https://raw.githubusercontent.com/Fathy89/Chat-With-Your-PDFs/main/t1.PNG)
 
-<br><br>
+### image2 
 
-<p align="center">
-  <img src="https://raw.githubusercontent.com/Fathy89/Chat-With-Your-PDFs/main/t3.png" width="80%" />
-</p>
+![img2](https://raw.githubusercontent.com/Fathy89/Chat-With-Your-PDFs/main/t3.PNG)
 
-<br><br>
+### image3 
 
-<p align="center">
-  <img src="https://raw.githubusercontent.com/Fathy89/Chat-With-Your-PDFs/main/t4.png" width="80%" />
-</p>
+![img3](https://raw.githubusercontent.com/Fathy89/Chat-With-Your-PDFs/main/t4.PNG)
 
 
 
