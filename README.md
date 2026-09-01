@@ -110,14 +110,15 @@ project/
 ## 📸 Project Demo
 
 <p align="center">
-  <img src="t1.png" width="45%" />
-  <img src="t2.png" width="45%" />
+  <img src="https://raw.githubusercontent.com/Fathy89/Chat-With-Your-PDFs/main/t1.png" width="45%" />
+  <img src="https://raw.githubusercontent.com/Fathy89/Chat-With-Your-PDFs/main/t2.png" width="45%" />
 </p>
 
 <p align="center">
-  <img src="t3.png" width="45%" />
-  <img src="t4.png" width="45%" />
+  <img src="https://raw.githubusercontent.com/Fathy89/Chat-With-Your-PDFs/main/t3.png" width="45%" />
+  <img src="https://raw.githubusercontent.com/Fathy89/Chat-With-Your-PDFs/main/t4.png" width="45%" />
 </p>
+
 ## 🚀 Installation
 
 ### 1. Clone or download the project
