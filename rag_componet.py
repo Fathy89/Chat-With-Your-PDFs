@@ -26,11 +26,17 @@ def get_cohere_api_key(api_key=None):
     2. cohere_key from the .env file.
     3. COHERE_API_KEY from the environment.
     """
-    key = api_key or os.getenv("cohere_key") or os.getenv("COHERE_API_KEY")
+
+    key = (
+        api_key
+        or os.getenv("cohere_key")
+        or os.getenv("COHERE_API_KEY")
+    )
 
     if not key:
         raise ValueError(
-            "Cohere API key is required. Enter it in the Streamlit sidebar "
+            "Cohere API key is required. "
+            "Enter it in the Streamlit sidebar "
             "or add cohere_key=YOUR_KEY to your .env file."
         )
 
@@ -38,7 +44,8 @@ def get_cohere_api_key(api_key=None):
 
 
 def create_embeddings(api_key=None):
-    """Create the Cohere embedding model for the current API key."""
+    """Create the Cohere embedding model."""
+
     return CohereEmbeddings(
         model="embed-v4.0",
         cohere_api_key=get_cohere_api_key(api_key)
@@ -46,7 +53,8 @@ def create_embeddings(api_key=None):
 
 
 def create_llm(api_key=None):
-    """Create the Cohere chat model for the current API key."""
+    """Create the Cohere chat model."""
+
     return ChatCohere(
         model="command-a-03-2025",
         temperature=0,
@@ -93,6 +101,11 @@ def retrieval(
     chunk_overlap=100,
     max_pages=None
 ):
+    """
+    Load a PDF, split it into chunks,
+    and attach metadata.
+    """
+
     loader = PyPDFLoader(file_path)
 
     documents = loader.load()
@@ -117,8 +130,9 @@ def retrieval(
 
     chunks = text_splitter.split_documents(documents)
 
-    # Add generic metadata
+    # Add metadata
     for chunk in chunks:
+
         chunk.metadata["source"] = filename
         chunk.metadata["document_type"] = document_type
         chunk.metadata["category"] = category
@@ -127,7 +141,7 @@ def retrieval(
 
 
 # ============================================================
-# CREATE FAISS WITH BATCHED EMBEDDINGS
+# CREATE NEW FAISS DATABASE
 # ============================================================
 
 def create_vector_db(
@@ -138,15 +152,13 @@ def create_vector_db(
     cohere_api_key=None
 ):
     """
-    Create a FAISS database without sending all document
-    chunks to Cohere in one huge embedding request.
+    Create a NEW FAISS database.
 
-    batch_size:
-        Number of chunks embedded per API request.
+    This should normally be used only when
+    creating the knowledge base for the first time.
 
-    delay:
-        Delay between batches. Increase this if you hit
-        Cohere rate limits.
+    For adding new PDFs to an existing database,
+    use add_chunks_to_vector_db().
     """
 
     if not chunks:
@@ -160,11 +172,18 @@ def create_vector_db(
         )
 
     vector_db = None
-    embeddings = create_embeddings(cohere_api_key)
+
+    embeddings = create_embeddings(
+        cohere_api_key
+    )
 
     total = len(chunks)
 
-    for start in range(0, total, batch_size):
+    for start in range(
+        0,
+        total,
+        batch_size
+    ):
 
         end = min(
             start + batch_size,
@@ -197,9 +216,11 @@ def create_vector_db(
 
             error_text = str(e).lower()
 
-            if "429" in error_text or "rate limit" in error_text:
+            if (
+                "429" in error_text
+                or "rate limit" in error_text
+            ):
 
-                # Give Cohere some time before retrying
                 print(
                     "Cohere rate limit reached. "
                     "Waiting before retry..."
@@ -209,7 +230,6 @@ def create_vector_db(
                     max(delay, 10)
                 )
 
-                # Retry this same batch
                 if vector_db is None:
 
                     vector_db = FAISS.from_documents(
@@ -226,23 +246,25 @@ def create_vector_db(
             else:
                 raise
 
-        # Progress callback for Streamlit
+        # Progress callback
         if progress_callback:
 
             progress_callback(
                 end / total
             )
 
-        # Delay between requests
+        # Delay
         if end < total:
 
-            time.sleep(delay)
+            time.sleep(
+                delay
+            )
 
     return vector_db
 
 
 # ============================================================
-# ADD NEW DOCUMENTS TO EXISTING FAISS
+# ADD NEW CHUNKS TO EXISTING FAISS
 # ============================================================
 
 def add_chunks_to_vector_db(
@@ -254,19 +276,37 @@ def add_chunks_to_vector_db(
     cohere_api_key=None
 ):
     """
-    Add new chunks to an existing FAISS database.
+    Add NEW chunks to an EXISTING FAISS database.
+
+    Existing documents are NOT re-embedded.
+    Only the new chunks are sent to Cohere.
     """
+
+    if vector_db is None:
+        raise ValueError(
+            "Existing FAISS database is required."
+        )
 
     if not chunks:
         return vector_db
 
-    # The existing FAISS object already contains its embedding function,
-    # so the API key is only resolved here to validate that it is available.
-    get_cohere_api_key(cohere_api_key)
+    if batch_size < 1:
+        raise ValueError(
+            "batch_size must be >= 1."
+        )
+
+    # Validate API key
+    get_cohere_api_key(
+        cohere_api_key
+    )
 
     total = len(chunks)
 
-    for start in range(0, total, batch_size):
+    for start in range(
+        0,
+        total,
+        batch_size
+    ):
 
         end = min(
             start + batch_size,
@@ -274,6 +314,11 @@ def add_chunks_to_vector_db(
         )
 
         batch = chunks[start:end]
+
+        print(
+            f"Adding chunks "
+            f"{start + 1}-{end} / {total}"
+        )
 
         try:
 
@@ -285,7 +330,15 @@ def add_chunks_to_vector_db(
 
             error_text = str(e).lower()
 
-            if "429" in error_text or "rate limit" in error_text:
+            if (
+                "429" in error_text
+                or "rate limit" in error_text
+            ):
+
+                print(
+                    "Cohere rate limit reached. "
+                    "Waiting before retry..."
+                )
 
                 time.sleep(
                     max(delay, 10)
@@ -298,15 +351,19 @@ def add_chunks_to_vector_db(
             else:
                 raise
 
+        # Progress callback
         if progress_callback:
 
             progress_callback(
                 end / total
             )
 
+        # Delay
         if end < total:
 
-            time.sleep(delay)
+            time.sleep(
+                delay
+            )
 
     return vector_db
 
@@ -327,12 +384,14 @@ def augmented(
     """
     Retrieve relevant chunks using FAISS.
 
-    IMPORTANT:
-    FAISS metadata filtering is applied by LangChain after
-    similarity search in the standard FAISS implementation.
-    Therefore, this is not the same as a native database
-    pre-filter before vector search.
+    Metadata filters are applied by LangChain's
+    FAISS implementation.
     """
+
+    if vector_db is None:
+        raise ValueError(
+            "Vector database is not initialized."
+        )
 
     # --------------------------------------------------------
     # Build metadata filter
@@ -373,6 +432,7 @@ def augmented(
     # --------------------------------------------------------
 
     context_parts = []
+
     current_length = 0
 
     for chunk in retrieved_chunks:
@@ -421,7 +481,8 @@ def augmented(
 
         # Respect context size
         if (
-            current_length + len(chunk_text)
+            current_length
+            + len(chunk_text)
             > max_context_chars
         ):
             break
@@ -448,15 +509,22 @@ def generative(
     question,
     cohere_api_key=None
 ):
+    """
+    Generate an answer using only the retrieved context.
+    """
+
     final_prompt = prompt.format(
         context=context,
         question=question
     )
 
-    llm = create_llm(cohere_api_key)
+    llm = create_llm(
+        cohere_api_key
+    )
 
     response = llm.invoke(
         final_prompt
     )
 
     return response.content
+
