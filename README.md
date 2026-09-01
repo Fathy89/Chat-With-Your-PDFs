@@ -87,7 +87,6 @@ project/
 ├── rag_componet.py
 ├── README.md
 ├── requirements.txt
-└── .env                 # optional, do NOT commit this file
 ```
 
 > The original module name in this project is `rag_componet.py`. Keep that filename consistent with the import in `ui.py`.
@@ -111,12 +110,12 @@ project/
 
 <p align="center">
   <img src="[https://raw.githubusercontent.com/Fathy89/Chat-With-Your-PDFs/main/t1.png](https://github.com/Fathy89/Chat-With-Your-PDFs/blob/main/t1.PNG?raw=true)" width="45%" />
-  <img src="[https://raw.githubusercontent.com/Fathy89/Chat-With-Your-PDFs/main/t2.pn](https://github.com/Fathy89/Chat-With-Your-PDFs/blob/main/t1.PNG?raw=true)g" width="45%" />
+  <img src="[https://raw.githubusercontent.com/Fathy89/Chat-With-Your-PDFs/main/t2.pn](https://github.com/Fathy89/Chat-With-Your-PDFs/blob/main/t2.PNG?raw=true)g" width="45%" />
 </p>
 
 <p align="center">
-  <img src="[https://raw.githubusercontent.com/Fathy89/Chat-With-Your-PDFs/main/t3.png](https://github.com/Fathy89/Chat-With-Your-PDFs/blob/main/t1.PNG?raw=true)" width="45%" />
-  <img src="[https://raw.githubusercontent.com/Fathy89/Chat-With-Your-PDFs/main/t4.png](https://github.com/Fathy89/Chat-With-Your-PDFs/blob/main/t1.PNG?raw=true)" width="45%" />
+  <img src="[https://raw.githubusercontent.com/Fathy89/Chat-With-Your-PDFs/main/t3.png](https://github.com/Fathy89/Chat-With-Your-PDFs/blob/main/t3.PNG?raw=true)" width="45%" />
+  <img src="[https://raw.githubusercontent.com/Fathy89/Chat-With-Your-PDFs/main/t4.png](https://github.com/Fathy89/Chat-WithYourPDFs/blob/main/t4.PNG?raw=true)" width="45%" />
 </p>
 
 ## 🚀 Installation
