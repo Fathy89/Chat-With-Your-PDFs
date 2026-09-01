@@ -108,16 +108,11 @@ project/
 
 ## 📸 Project Demo
 
-<p align="center">
-  <img src="[https://raw.githubusercontent.com/Fathy89/Chat-With-Your-PDFs/main/t1.png](https://github.com/Fathy89/Chat-With-Your-PDFs/blob/main/t1.PNG?raw=true)" width="45%" />
-  <img src="[https://raw.githubusercontent.com/Fathy89/Chat-With-Your-PDFs/main/t2.pn](https://github.com/Fathy89/Chat-With-Your-PDFs/blob/main/t2.PNG?raw=true)g" width="45%" />
-</p>
+!["img1"][https://raw.githubusercontent.com/Fathy89/Chat-With-Your-PDFs/main/t1.png](https://github.com/Fathy89/Chat-With-Your-PDFs/blob/main/t1.PNG?raw=true]
 
-<p align="center">
-  <img src="[https://raw.githubusercontent.com/Fathy89/Chat-With-Your-PDFs/main/t3.png](https://github.com/Fathy89/Chat-With-Your-PDFs/blob/main/t3.PNG?raw=true)" width="45%" />
-  <img src="[https://raw.githubusercontent.com/Fathy89/Chat-With-Your-PDFs/main/t4.png](https://github.com/Fathy89/Chat-WithYourPDFs/blob/main/t4.PNG?raw=true)" width="45%" />
-</p>
-
+!["img2"][https://raw.githubusercontent.com/Fathy89/Chat-With-Your-PDFs/main/t2.png](https://github.com/Fathy89/Chat-With-Your-PDFs/blob/main/t2.PNG?raw=true]
+!["img3"][https://raw.githubusercontent.com/Fathy89/Chat-With-Your-PDFs/main/t3.png](https://github.com/Fathy89/Chat-With-Your-PDFs/blob/main/t3.PNG?raw=true]
+!["img4"][https://raw.githubusercontent.com/Fathy89/Chat-With-Your-PDFs/main/t4.png](https://github.com/Fathy89/Chat-With-Your-PDFs/blob/main/t4.PNG?raw=true]
 ## 🚀 Installation
 
 ### 1. Clone or download the project
