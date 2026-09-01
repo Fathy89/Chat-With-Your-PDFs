@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 from rag_componet import (
     retrieval,
     create_vector_db,
+    add_chunks_to_vector_db,
     augmented,
     generative
 )
@@ -54,7 +55,7 @@ with st.sidebar:
     st.title("🤖 Universal RAG")
 
     st.caption(
-        "Chat With Your Documnets"
+        "Chat With Your Documents"
     )
 
     st.divider()
@@ -77,15 +78,25 @@ with st.sidebar:
         type="password",
         placeholder="Enter your Cohere API key",
         help=(
-            "Your key is used for embeddings and answer generation. "
-            "It is kept in Streamlit session state and is not written to disk."
+            "Your key is used for embeddings and "
+            "answer generation. It is kept in "
+            "Streamlit session state and is not "
+            "written to disk."
         )
     ).strip()
 
     if cohere_api_key:
-        st.success("Cohere API key is configured.")
+
+        st.success(
+            "Cohere API key is configured."
+        )
+
     else:
-        st.warning("Enter a Cohere API key before building the knowledge base.")
+
+        st.warning(
+            "Enter a Cohere API key before "
+            "building the knowledge base."
+        )
 
     st.divider()
 
@@ -100,11 +111,7 @@ with st.sidebar:
         min_value=300,
         max_value=3000,
         value=1000,
-        step=100,
-        help=(
-            "Approximate number of characters "
-            "in each chunk."
-        )
+        step=100
     )
 
     chunk_overlap = st.slider(
@@ -112,11 +119,7 @@ with st.sidebar:
         min_value=0,
         max_value=500,
         value=100,
-        step=50,
-        help=(
-            "Number of characters shared between "
-            "neighboring chunks."
-        )
+        step=50
     )
 
     max_pages = st.number_input(
@@ -124,11 +127,7 @@ with st.sidebar:
         min_value=1,
         max_value=10000,
         value=500,
-        step=50,
-        help=(
-            "Only this many pages from each PDF "
-            "will be processed."
-        )
+        step=50
     )
 
     top_k = st.slider(
@@ -144,10 +143,7 @@ with st.sidebar:
         min_value=2000,
         max_value=100000,
         value=12000,
-        step=1000,
-        help=(
-            "Maximum retrieved text sent to the LLM."
-        )
+        step=1000
     )
 
     embedding_batch_size = st.slider(
@@ -155,11 +151,7 @@ with st.sidebar:
         min_value=1,
         max_value=50,
         value=10,
-        step=1,
-        help=(
-            "Smaller batches reduce the chance of "
-            "hitting Cohere's token-rate limit."
-        )
+        step=1
     )
 
     embedding_delay = st.number_input(
@@ -167,10 +159,7 @@ with st.sidebar:
         min_value=0.0,
         max_value=30.0,
         value=2.0,
-        step=0.5,
-        help=(
-            "Increase this if Cohere returns HTTP 429."
-        )
+        step=0.5
     )
 
     st.divider()
@@ -190,6 +179,8 @@ with st.sidebar:
     # ========================================================
     # DOCUMENT CONFIGURATION
     # ========================================================
+
+    document_config = {}
 
     if uploaded_files:
 
@@ -222,8 +213,6 @@ with st.sidebar:
             "Other"
         ]
 
-        document_config = {}
-
         for uploaded_file in uploaded_files:
 
             filename = uploaded_file.name
@@ -253,21 +242,22 @@ with st.sidebar:
         st.divider()
 
         # ====================================================
-        # BUILD KNOWLEDGE BASE
+        # BUILD / UPDATE KNOWLEDGE BASE
         # ====================================================
 
         if st.button(
-            "🚀 Build Knowledge Base",
+            "🚀 Build / Update Knowledge Base",
             use_container_width=True
         ):
 
             if not cohere_api_key:
-                st.error(
-                    "❌ Please enter your Cohere API key in the sidebar first."
-                )
-                st.stop()
 
-            all_chunks = []
+                st.error(
+                    "❌ Please enter your Cohere API key "
+                    "in the sidebar first."
+                )
+
+                st.stop()
 
             progress_bar = st.progress(0)
 
@@ -275,16 +265,43 @@ with st.sidebar:
 
             try:
 
-                total_files = len(
-                    uploaded_files
+                # ============================================
+                # DETERMINE NEW FILES
+                # ============================================
+
+                existing_files = set(
+                    st.session_state.files
                 )
 
+                new_files = [
+                    file
+                    for file in uploaded_files
+                    if file.name not in existing_files
+                ]
+
+                if not new_files:
+
+                    st.info(
+                        "ℹ️ No new documents detected. "
+                        "All uploaded documents are already "
+                        "in the knowledge base."
+                    )
+
+                    progress_bar.empty()
+                    status_text.empty()
+
+                    st.stop()
+
                 # ============================================
-                # PROCESS FILES
+                # PROCESS ONLY NEW FILES
                 # ============================================
 
+                all_new_chunks = []
+
+                total_files = len(new_files)
+
                 for file_index, uploaded_file in enumerate(
-                    uploaded_files
+                    new_files
                 ):
 
                     filename = uploaded_file.name
@@ -335,111 +352,161 @@ with st.sidebar:
                         )
 
                         if not chunks:
+
                             st.warning(
                                 f"No text found in "
                                 f"{filename}."
                             )
 
-                        all_chunks.extend(
+                        all_new_chunks.extend(
                             chunks
                         )
 
                     finally:
 
-                        if os.path.exists(file_path):
-                            os.remove(file_path)
+                        if os.path.exists(
+                            file_path
+                        ):
 
-                    # File-level progress
+                            os.remove(
+                                file_path
+                            )
+
+                    # File progress
                     file_progress = (
                         (file_index + 1)
                         / total_files
                     )
 
                     progress_bar.progress(
-                        min(
-                            file_progress * 0.5,
-                            0.5
+                        int(
+                            file_progress * 40
                         )
                     )
 
                 # ============================================
-                # CHECK
+                # CHECK CHUNKS
                 # ============================================
 
-                if not all_chunks:
+                if not all_new_chunks:
 
                     st.error(
-                        "No text chunks were created."
+                        "❌ No text chunks were created "
+                        "from the new documents."
                     )
+
+                    progress_bar.empty()
+                    status_text.empty()
 
                     st.stop()
 
                 # ============================================
-                # CREATE FAISS
+                # CREATE OR UPDATE FAISS
                 # ============================================
 
                 status_text.markdown(
-                    "### 🔎 Creating FAISS index..."
+                    "### 🔎 Updating FAISS index..."
                 )
 
-                def update_embedding_progress(value):
+                def update_embedding_progress(
+                    value
+                ):
 
                     progress_bar.progress(
-                        0.5 + (value * 0.5)
+                        int(
+                            40 + (value * 60)
+                        )
                     )
 
-                vector_db = create_vector_db(
-                    chunks=all_chunks,
-                    batch_size=embedding_batch_size,
-                    delay=embedding_delay,
-                    progress_callback=(
-                        update_embedding_progress
-                    ),
-                    cohere_api_key=cohere_api_key
-                )
+                # --------------------------------------------
+                # FIRST BUILD
+                # --------------------------------------------
+
+                if st.session_state.vector_db is None:
+
+                    vector_db = create_vector_db(
+                        chunks=all_new_chunks,
+                        batch_size=embedding_batch_size,
+                        delay=embedding_delay,
+                        progress_callback=(
+                            update_embedding_progress
+                        ),
+                        cohere_api_key=cohere_api_key
+                    )
+
+                # --------------------------------------------
+                # ADD TO EXISTING FAISS
+                # --------------------------------------------
+
+                else:
+
+                    vector_db = add_chunks_to_vector_db(
+                        vector_db=(
+                            st.session_state.vector_db
+                        ),
+                        chunks=all_new_chunks,
+                        batch_size=embedding_batch_size,
+                        delay=embedding_delay,
+                        progress_callback=(
+                            update_embedding_progress
+                        ),
+                        cohere_api_key=cohere_api_key
+                    )
 
                 # ============================================
-                # SAVE STATE
+                # UPDATE SESSION STATE
                 # ============================================
 
                 st.session_state.vector_db = (
                     vector_db
                 )
 
-                st.session_state.chunks = (
-                    all_chunks
+                st.session_state.chunks.extend(
+                    all_new_chunks
                 )
 
-                st.session_state.files = [
-                    file.name
-                    for file in uploaded_files
-                ]
+                for uploaded_file in new_files:
 
-                st.session_state.document_config = (
-                    document_config.copy()
-                )
+                    filename = uploaded_file.name
+
+                    st.session_state.files.append(
+                        filename
+                    )
+
+                    st.session_state.document_config[
+                        filename
+                    ] = document_config[
+                        filename
+                    ]
+
+                # ============================================
+                # RESET CHAT
+                # ============================================
 
                 st.session_state.messages = []
 
-                progress_bar.progress(1.0)
+                # ============================================
+                # FINISH
+                # ============================================
+
+                progress_bar.progress(100)
 
                 status_text.empty()
 
                 st.success(
-                    "✅ Knowledge base created!"
+                    "✅ Knowledge base updated successfully!"
                 )
 
                 st.info(
-                    f"Processed "
-                    f"**{len(uploaded_files)}** documents "
-                    f"and created "
-                    f"**{len(all_chunks)}** chunks."
+                    f"Added **{len(new_files)}** new "
+                    f"document(s) and "
+                    f"**{len(all_new_chunks)}** new chunks."
                 )
 
             except Exception as e:
 
                 st.error(
-                    f"❌ Error while processing documents:\n\n"
+                    "❌ Error while processing documents:\n\n"
                     f"{e}"
                 )
 
@@ -460,12 +527,16 @@ with st.sidebar:
 
         st.metric(
             "Documents",
-            len(st.session_state.files)
+            len(
+                st.session_state.files
+            )
         )
 
         st.metric(
             "Chunks",
-            len(st.session_state.chunks)
+            len(
+                st.session_state.chunks
+            )
         )
 
     else:
@@ -498,7 +569,9 @@ if st.session_state.vector_db is not None:
 
     st.divider()
 
-    st.subheader("🔎 Search Filters")
+    st.subheader(
+        "🔎 Search Filters"
+    )
 
     col1, col2, col3 = st.columns(3)
 
@@ -552,22 +625,26 @@ if st.session_state.vector_db is not None:
 
         selected_source = st.selectbox(
             "📄 Document",
-            ["All"] + st.session_state.files
+            ["All"]
+            + st.session_state.files
         )
 
     active_filters = []
 
     if selected_type != "All":
+
         active_filters.append(
             f"Type = **{selected_type}**"
         )
 
     if selected_category != "All":
+
         active_filters.append(
             f"Category = **{selected_category}**"
         )
 
     if selected_source != "All":
+
         active_filters.append(
             f"Document = **{selected_source}**"
         )
@@ -611,9 +688,12 @@ question = st.chat_input(
 if question:
 
     if not cohere_api_key:
+
         st.warning(
-            "⚠️ Please enter your Cohere API key in the sidebar first."
+            "⚠️ Please enter your Cohere API key "
+            "in the sidebar first."
         )
+
         st.stop()
 
     if st.session_state.vector_db is None:
@@ -631,7 +711,9 @@ if question:
 
     with st.chat_message("user"):
 
-        st.markdown(question)
+        st.markdown(
+            question
+        )
 
     st.session_state.messages.append(
         {
@@ -683,7 +765,9 @@ if question:
                     document_type=type_filter,
                     category=category_filter,
                     source=source_filter,
-                    max_context_chars=max_context_chars
+                    max_context_chars=(
+                        max_context_chars
+                    )
                 )
 
             # ================================================
@@ -706,14 +790,18 @@ if question:
                     answer = generative(
                         context=context,
                         question=question,
-                        cohere_api_key=cohere_api_key
+                        cohere_api_key=(
+                            cohere_api_key
+                        )
                     )
 
             # ================================================
             # DISPLAY ANSWER
             # ================================================
 
-            st.markdown(answer)
+            st.markdown(
+                answer
+            )
 
             # ================================================
             # RETRIEVED CHUNKS
@@ -799,6 +887,7 @@ if question:
         except Exception as e:
 
             st.error(
-                f"❌ Error generating answer:\n\n"
+                "❌ Error generating answer:\n\n"
                 f"{e}"
             )
+
