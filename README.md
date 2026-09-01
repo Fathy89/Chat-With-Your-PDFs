@@ -109,13 +109,15 @@ project/
 
 ## 📸 Project Demo
 
-![Picture 1](t1.png)
+<p align="center">
+  <img src="t1.png" width="45%" />
+  <img src="t2.png" width="45%" />
+</p>
 
-![Picture 2](t2.png)
-
-![Picture 3](t3.png)
-
-![Picture 4](t4.png)
+<p align="center">
+  <img src="t3.png" width="45%" />
+  <img src="t4.png" width="45%" />
+</p>
 ## 🚀 Installation
 
 ### 1. Clone or download the project
@@ -471,26 +473,6 @@ You can experiment with:
 ### Context size
 
 Try different context limits and observe how answer quality changes.
-
-### Retrieval evaluation
-
-For a more serious RAG evaluation, create a test set containing:
-
-```text
-Question
-Expected Answer
-Relevant Document
-Relevant Chunk(s)
-```
-
-Then measure metrics such as:
-
-- Precision@K
-- Recall@K
-- Mean Average Precision (MAP)
-- MRR
-- Answer faithfulness
-- Answer relevance
 
 ## 🛠️ Troubleshooting
 
