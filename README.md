@@ -107,14 +107,22 @@ project/
 
 
 ## 📸 Project Demo
+<p align="center">
+  <img src="https://raw.githubusercontent.com/Fathy89/Chat-With-Your-PDFs/main/t1.png" width="80%" />
+</p>
 
-![img1](https://raw.githubusercontent.com/Fathy89/Chat-With-Your-PDFs/main/t1.PNG)
+<br><br>
 
-![img2](https://raw.githubusercontent.com/Fathy89/Chat-With-Your-PDFs/main/t2.PNG)
+<p align="center">
+  <img src="https://raw.githubusercontent.com/Fathy89/Chat-With-Your-PDFs/main/t3.png" width="80%" />
+</p>
 
-![img3](https://raw.githubusercontent.com/Fathy89/Chat-With-Your-PDFs/main/t3.PNG)
+<br><br>
 
-![img4](https://raw.githubusercontent.com/Fathy89/Chat-With-Your-PDFs/main/t4.PNG)
+<p align="center">
+  <img src="https://raw.githubusercontent.com/Fathy89/Chat-With-Your-PDFs/main/t4.png" width="80%" />
+</p>
+
 
 
 ## 🚀 Installation
